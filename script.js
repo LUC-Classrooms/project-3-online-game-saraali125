@@ -8,9 +8,8 @@
 let gameState = "splash";
 let player1;
 let gameTimer; 
-let dropTimer; // regulate star and comet drops
+let dropTimer; // regulate star drops
 let stars = []; // an array to hold star objects
-let comets = []; // an array to hold comet objects
 let score = 0; // keep track of points (starting at 0)
 let misses = 0; // keep track of misses
 
@@ -21,7 +20,7 @@ function setup() {
   // Set up game timer for 30 seconds
   gameTimer = new Timer(30000); // 30 second timer
 
-  // Set up drop timer for stars and comets (every 1 second)
+  // Set up drop timer for stars (every 1 second)
   dropTimer = new Timer(1000);
 }
 
@@ -51,7 +50,7 @@ function splash() {
   fill(255);
   text("SAVE THE STARS!", width / 2, height / 3);
   textSize(16);
-  text("THREE STRIKES AND YOU'RE OUT", width / 2, height / 2);
+  text("THREE STRIKES AND YOURE OUT", width / 2, height / 2);
   fill(255, 255, 0);
   ellipse(50,50,20,20);
   ellipse(500,40,30,30);
@@ -68,7 +67,7 @@ function splash() {
   ellipse(210,350,13,13);
   ellipse(510,250,13,13);
   ellipse(370,250,18,18);
-  ellipse(550,365,18,18);
+  ellipse(50,550,18,18);
 }
 
 function play() {
@@ -112,16 +111,10 @@ function play() {
   text("TIME LEFT: " + (gameTimer.duration - gameTimer.elapsedTime) / 1000 + " seconds", 20, 20); // show time left
   text("SCORE: " + score, 20, 40); // show score
 
-  // Check the drop timer to spawn stars and comets
+  // Check the drop timer to spawn stars
   if(dropTimer.isFinished()) {
-    let r = random(1);
-    if (r < 0.8) { // 80% chance of spawning stars
-      let s = new Star(random(width), -40); // create a star object
-      stars.push(s); // add star to array
-    } else { // 20% chance of spawning comets
-      let c = new Comet(random(width), -40); // create a comet object
-      comets.push(c); // add comet to array
-    }
+    let s = new Star(random(width), -40); // create a star object
+    stars.push(s); // add star to array
     dropTimer.start(); // restart timer for next drop
   }
 
@@ -147,27 +140,6 @@ function play() {
       score += 10; // add 10 points to the score
     }
   }
-
-  // Manage the comets array
-  for(let i = comets.length - 1; i >= 0; i--) { 
-    comets[i].display();
-    comets[i].move();
-
-    // Remove comets that go past the bottom
-    if(comets[i].y > height) {
-      comets.splice(i, 1); // remove from array
-    }
-
-    // Collision detection with player (rocket)
-    let d = dist(comets[i].x, comets[i].y, player1.x, player1.y);
-    if (d < 50) {
-      comets.splice(i, 1); // remove from array
-      misses++; // increment misses
-      if (misses >= 5) {
-        gameState = "gameOver"; // end game if misses reach 5
-      }
-    }
-  }
 }
 
 function gameOver() {
@@ -186,7 +158,7 @@ function mousePressed() {
   if (gameState === "splash") {
     gameState = "play";
     gameTimer.start(); // start the game timer
-    dropTimer.start(); // start the drop timer for stars and comets
+    dropTimer.start(); // start the drop timer for stars
     score = 0; // reset score to 0 at start of game
     misses = 0; // reset misses to 0 at start of game
   } else if (gameState === "play") {
@@ -265,7 +237,7 @@ function Star(tempX, tempY) {
   this.y = tempY;
   this.size = 40;
   this.speed = 7; // Increase speed to make stars move down very fast
-
+//Sometimes when I increase the speed it makes the game freeze but its a great way to test your reflexes
   // Display star object
   this.display = function () {
     fill(255, 255, 0);
@@ -277,7 +249,6 @@ function Star(tempX, tempY) {
   this.move = function () {
     this.y += this.speed; // Increase y position by speed value
   }
-
 }
 
 // Timer class definition
@@ -305,5 +276,3 @@ class Timer {
     return false;
   }
 }
-//i tried adding comets to make the game harder but the issue was that the game would freeze.
-//the same thing occured when i would make the speed of the stars faster
