@@ -8,11 +8,19 @@
 let gameState = "splash";
 let player1;
 let gameTimer; 
+let testBox; // a box to preview on the splash screen
+let dropTimer; // regulate box drops
+let presents = new Array(0); // an empty array called "presents"
 
 function setup() {
   createCanvas(600, 400);
   player1 = new Player(width / 2, height * 4 / 5);
   gameTimer = new Timer(5000); // 5 second timer
+
+  // Assign a new Timer object to dropTimer, set for 1000 ms (1 second)
+  dropTimer = new Timer(1000);
+  // Make a test version of our Box() object to show on the splash screen
+  testBox = new Box(width/2, height/3);
 }
 
 function draw() {
@@ -33,7 +41,11 @@ function draw() {
 }
 
 function splash() {
-  // this is what you would see when the game starts
+  // Show the test box on the splash screen
+  testBox.display();
+  testBox.spin();
+
+  // Other splash screen elements
   fill(0);
   background(20, 20, 300);
   textAlign(CENTER);
@@ -49,14 +61,14 @@ function play() {
   fill(0, 0, 200) //changes the color of the text
   textAlign(CENTER);
   textSize(16);
-  text("This is where the Game happens", width / 2, height / 2);
+  text("This is where the Game happens", width / 2, height/13);
 
-  // this is needed to show the player1 sprite on the screen
+  // Show the player sprite on the screen
   player1.display();
-
   player1.x = mouseX;
   player1.y = mouseY;
 
+  // Control player movement with arrow keys
   if (keyIsPressed) {
     switch (keyCode) {
       case UP_ARROW:
@@ -75,17 +87,41 @@ function play() {
         console.log("Use the arrow keys to move");
     }
   }
-  player1.move(); // helps move the player
+  player1.move(); // move the player
 
-  //this will check if game timer has finished
+  // Check if game timer has finished
   if (gameTimer.isFinished()) {
     gameState = "gameOver";
   }
 
-  //displays elapsed time without decimals
+  // Display elapsed time without decimals
   textAlign(LEFT);
-  text("elapsed time: " + gameTimer.elapsedTime, 40, 100);
-  // show elapsed time in top left corner
+  text("Elapsed time: " + floor(gameTimer.elapsedTime / 1000) + " seconds", 32, 380); // show elapsed time in top left corner
+//i wanted it to be lower so it would be easier to look at the screen without text blocking it
+  // Check the drop timer
+  if(dropTimer.isFinished()) {
+    let p = new Box(random(width), -40);
+    presents.push(p);
+    dropTimer.start(); // restart timer for next drop
+  }
+
+  // Manage the presents array
+  for(let i = 0; i < presents.length; i++) { 
+    presents[i].display();
+    presents[i].move();
+    presents[i].spin();
+
+    // Remove presents that went past the bottom
+    if(presents[i].y > height) {
+      presents.splice(i, 1); // remove from array
+    }
+
+    // Collision detection with player
+    let d = dist(presents[i].x, presents[i].y, player1.x, player1.y);
+    if (d < 50) {
+      presents.splice(i, 1); // remove from array
+    }
+  }
 }
 
 function gameOver() {
@@ -99,9 +135,10 @@ function gameOver() {
 function mousePressed() {
   if (gameState === "splash") {
     gameState = "play";
-    gameTimer.start(); // starts the timer when the game begins
+    gameTimer.start(); // start the game timer
+    dropTimer.start(); // start the drop timer for presents
   } else if (gameState === "play") {
-    // gameState = "gameOver"; //commented out to disable transition to game over state via mouse click
+    // gameState = "gameOver"; // Commented out to disable transition to game over state via mouse click
   } else if (gameState === "gameOver") {
     gameState = "splash";
   }
