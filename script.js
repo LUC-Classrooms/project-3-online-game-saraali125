@@ -12,7 +12,7 @@ let dropTimer; // regulate star and comet drops
 let stars = []; // an array to hold star objects
 let comets = []; // an array to hold comet objects
 let score = 0; // keep track of points (starting at 0)
-let cometMisses = 0; // keep track of comet misses
+let misses = 0; // keep track of misses
 
 function setup() {
   createCanvas(600, 400);
@@ -134,6 +134,10 @@ function play() {
     if(stars[i].y > height) {
       stars.splice(i, 1); // remove from array
       score--; // decrement score by 1
+      misses++; // increment misses
+      if (misses >= 3) {
+        gameState = "gameOver"; // end game if misses reach 3
+      }
     }
 
     // Collision detection with player (rocket)
@@ -152,20 +156,15 @@ function play() {
     // Remove comets that go past the bottom
     if(comets[i].y > height) {
       comets.splice(i, 1); // remove from array
-      cometMisses++; // increment comet misses
-      if (cometMisses >= 3) {
-        gameState = "gameOver"; // end game if comet misses reach 3
-      }
     }
 
     // Collision detection with player (rocket)
     let d = dist(comets[i].x, comets[i].y, player1.x, player1.y);
     if (d < 50) {
       comets.splice(i, 1); // remove from array
-      score -= 20; // subtract 20 points from the score
-      cometMisses++; // increment comet misses
-      if (cometMisses >= 3) {
-        gameState = "gameOver"; // end game if comet misses reach 3
+      misses++; // increment misses
+      if (misses >= 5) {
+        gameState = "gameOver"; // end game if misses reach 5
       }
     }
   }
@@ -189,7 +188,7 @@ function mousePressed() {
     gameTimer.start(); // start the game timer
     dropTimer.start(); // start the drop timer for stars and comets
     score = 0; // reset score to 0 at start of game
-    cometMisses = 0; // reset comet misses to 0 at start of game
+    misses = 0; // reset misses to 0 at start of game
   } else if (gameState === "play") {
     // No action during gameplay
   } else if (gameState === "gameOver") {
@@ -278,25 +277,7 @@ function Star(tempX, tempY) {
   this.move = function () {
     this.y += this.speed; // Increase y position by speed value
   }
-}
 
-// Comet object constructor
-function Comet(tempX, tempY) {
-  this.x = tempX;
-  this.y = tempY;
-  this.size = 30;
-  this.speed = 10; // Adjust speed as needed
-
-  // Display comet object
-  this.display = function () {
-    fill(150); // Set comet color (gray)
-    ellipse(this.x, this.y, this.size);
-  }
-
-  // Move comet object
-  this.move = function () {
-    this.y += this.speed; // Increase y position by speed value
-  }
 }
 
 // Timer class definition
@@ -324,3 +305,5 @@ class Timer {
     return false;
   }
 }
+//i tried adding comets to make the game harder but the issue was that the game would freeze.
+//the same thing occured when i would make the speed of the stars faster
