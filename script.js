@@ -1,31 +1,33 @@
 /**
- * Project 3 versions 0-4 - 2D Web Game
- * Name: Sara Ali
+ * Fun 2D Web Game - Save the Stars!
+ * Created by: Sara Ali
  * 
- * Use this template to get started creating a simple 2D game for the web using P5.js. 
  */
 
+// Define game states
 let gameState = "splash";
 let player1;
 let gameTimer; 
-let testBox; // a box to preview on the splash screen
-let dropTimer; // regulate box drops
-let presents = new Array(0); // an empty array called "presents"
+let dropTimer; // regulate star and comet drops
+let stars = []; // an array to hold star objects
+let comets = []; // an array to hold comet objects
 let score = 0; // keep track of points (starting at 0)
+let cometMisses = 0; // keep track of comet misses
 
 function setup() {
   createCanvas(600, 400);
-  player1 = new Player(width / 2, height * 4 / 5);
-  gameTimer = new Timer(5000); // 5 second timer
+  // Initialize player object (rocket)
+  player1 = new Rocket(width / 2, height * 4 / 5);
+  // Set up game timer for 30 seconds
+  gameTimer = new Timer(30000); // 30 second timer
 
-  // Assign a new Timer object to dropTimer, set for 1000 ms (1 second)
+  // Set up drop timer for stars and comets (every 1 second)
   dropTimer = new Timer(1000);
-  // Make a test version of our Box() object to show on the splash screen
-  testBox = new Box(width/2, height/3);
 }
 
 function draw() {
   background(200);
+  // Manage game state transitions
   switch (gameState) {
     case "splash":
       splash();
@@ -37,39 +39,48 @@ function draw() {
       gameOver();
       break;
     default:
-      console.log("no match found - check your mousePressed() function!");
+      console.log("Unknown game state");
   }
 }
 
 function splash() {
-  // Show the test box on the splash screen
-  testBox.display();
-  testBox.spin();
-
-  // Other splash screen elements
-  fill(0);
-  background(20, 20, 300);
+  // Display splash screen elements
+  background(40, 30, 30);
   textAlign(CENTER);
-  textSize(16);
-  text("Let's Play a Game!", width / 2, height / 4);
   textSize(32);
-  text("Splash Screen", width/2, height/2);
+  fill(255);
+  text("SAVE THE STARS!", width / 2, height / 3);
+  textSize(16);
+  text("THREE STRIKES AND YOU'RE OUT", width / 2, height / 2);
+  fill(255, 255, 0);
+  ellipse(50,50,20,20);
+  ellipse(500,40,30,30);
+  ellipse(550,140,20,20);
+  ellipse(95,40,25,25);
+  ellipse(140,60,20,20);
+  ellipse(240,40,13,13);
+  ellipse(340,50,13,13);
+  ellipse(240,250,20,20);
+  ellipse(40,150,13,13);
+  ellipse(100,250,13,13);
+  ellipse(40,350,18,18);
+  ellipse(400,350,18,18);
+  ellipse(210,350,13,13);
+  ellipse(510,250,13,13);
+  ellipse(370,250,18,18);
+  ellipse(550,365,18,18);
 }
 
 function play() {
-  // this is what you see when the game is running 
-  background(0, 200, 0);
-  fill(0, 0, 200) //changes the color of the text
-  textAlign(CENTER);
-  textSize(16);
-  text("This is where the Game happens", width / 2, height/13);
-
-  // Show the player sprite on the screen
+  // Display game elements during gameplay
+  background(0, 0, 0);
+  // Show player sprite on screen (rocket)
   player1.display();
+  // Move player with mouse
   player1.x = mouseX;
   player1.y = mouseY;
 
-  // Control player movement with arrow keys
+  // Check arrow key inputs for player movement
   if (keyIsPressed) {
     switch (keyCode) {
       case UP_ARROW:
@@ -85,7 +96,7 @@ function play() {
         player1.angle += 0.02; // turn right
         break;
       default:
-        console.log("Use the arrow keys to move");
+        // No default action
     }
   }
   player1.move(); // move the player
@@ -95,103 +106,140 @@ function play() {
     gameState = "gameOver";
   }
 
-  // Display elapsed time without decimals
+  // Display elapsed time and score
   textAlign(LEFT);
-  text("Elapsed time: " + floor(gameTimer.elapsedTime / 1000) + " seconds", 32, 380); // show elapsed time in top left corner
-  text("Score: " + score, 32, 20); // show score at top left corner
+  fill(255);
+  text("TIME LEFT: " + (gameTimer.duration - gameTimer.elapsedTime) / 1000 + " seconds", 20, 20); // show time left
+  text("SCORE: " + score, 20, 40); // show score
 
-  // Check the drop timer
+  // Check the drop timer to spawn stars and comets
   if(dropTimer.isFinished()) {
-    let p = new Box(random(width), -40);
-    presents.push(p);
+    let r = random(1);
+    if (r < 0.8) { // 80% chance of spawning stars
+      let s = new Star(random(width), -40); // create a star object
+      stars.push(s); // add star to array
+    } else { // 20% chance of spawning comets
+      let c = new Comet(random(width), -40); // create a comet object
+      comets.push(c); // add comet to array
+    }
     dropTimer.start(); // restart timer for next drop
   }
 
-  // Manage the presents array
-  for(let i = 0; i < presents.length; i++) { 
-    presents[i].display();
-    presents[i].move();
-    presents[i].spin();
+  // Manage the stars array
+  for(let i = stars.length - 1; i >= 0; i--) { 
+    stars[i].display();
+    stars[i].move();
 
-    // Remove presents that went past the bottom
-    if(presents[i].y > height) {
-      presents.splice(i, 1); // remove from array
+    // Remove stars that go past the bottom
+    if(stars[i].y > height) {
+      stars.splice(i, 1); // remove from array
       score--; // decrement score by 1
     }
 
-    // Collision detection with player
-    let d = dist(presents[i].x, presents[i].y, player1.x, player1.y);
+    // Collision detection with player (rocket)
+    let d = dist(stars[i].x, stars[i].y, player1.x, player1.y);
     if (d < 50) {
-      presents.splice(i, 1); // remove from array
-      score++; // add 1 point to the score
+      stars.splice(i, 1); // remove from array
+      score += 10; // add 10 points to the score
+    }
+  }
+
+  // Manage the comets array
+  for(let i = comets.length - 1; i >= 0; i--) { 
+    comets[i].display();
+    comets[i].move();
+
+    // Remove comets that go past the bottom
+    if(comets[i].y > height) {
+      comets.splice(i, 1); // remove from array
+      cometMisses++; // increment comet misses
+      if (cometMisses >= 3) {
+        gameState = "gameOver"; // end game if comet misses reach 3
+      }
+    }
+
+    // Collision detection with player (rocket)
+    let d = dist(comets[i].x, comets[i].y, player1.x, player1.y);
+    if (d < 50) {
+      comets.splice(i, 1); // remove from array
+      score -= 20; // subtract 20 points from the score
+      cometMisses++; // increment comet misses
+      if (cometMisses >= 3) {
+        gameState = "gameOver"; // end game if comet misses reach 3
+      }
     }
   }
 }
 
 function gameOver() {
-  background(600, 0, 0);
-  fill(0);
-  textAlign(CENTER, CENTER);
+  // Display game over screen
+  background(200, 0, 0);
+  textAlign(CENTER);
   textSize(32);
-  text("Game Over", width/2, height/2);
-  text("Your final score: " + score, width/2, height * 2/3); // show final score
+  fill(255);
+  text("GAME OVER!", width / 2, height / 2);
+  textSize(24);
+  text("FINAL SCORE: " + score, width / 2, height * 2 / 3); // show final score
 }
 
 function mousePressed() {
+  // Start game on mouse click
   if (gameState === "splash") {
     gameState = "play";
     gameTimer.start(); // start the game timer
-    dropTimer.start(); // start the drop timer for presents
+    dropTimer.start(); // start the drop timer for stars and comets
     score = 0; // reset score to 0 at start of game
+    cometMisses = 0; // reset comet misses to 0 at start of game
   } else if (gameState === "play") {
-    // gameState = "gameOver"; // Commented out to disable transition to game over state via mouse click
+    // No action during gameplay
   } else if (gameState === "gameOver") {
+    // Restart game on mouse click after game over
     gameState = "splash";
   }
 }
 
-function Player(tempX, tempY) {
-  // properties
+// Rocket object constructor
+function Rocket(tempX, tempY) {
+  // Rocket object properties
   this.x = tempX;
   this.y = tempY;
-  this.diam = 50;
+  this.size = 50;
   this.angle = 0;
   this.xSpeed = 0;
   this.ySpeed = 0;
 
+  // Display rocket object
   this.display = function () {
     push();
     translate(this.x, this.y);
     rotate(this.angle);
-
-    fill(0);
-    let r = this.diam / 2;
-    let x1 = cos(PI + HALF_PI) * r;
-    let y1 = sin(PI + HALF_PI) * r;
-    let x2 = cos(PI / 6) * r;
-    let y2 = sin(PI / 6) * r;
-    let x3 = cos(PI * 5 / 6) * r;
-    let y3 = sin(PI * 5 / 6) * r;
+    fill(90, 700, 55); // Change fill color to white
+    stroke(90, 700, 55);
+    strokeWeight(2);
+    ellipse(0, -50, 30, 105); // Oval
+    // Triangle
     beginShape();
-    vertex(x1, y1);
-    vertex(x2, y2);
-    vertex(x3, y3);
-    endShape();
+    vertex(0, -12.5); // Top point
+    vertex(15, 12.5); // Bottom right point
+    vertex(-15, 12.5); // Bottom left point
+    endShape(CLOSE);
     pop();
   }
 
+  // Move rocket object
   this.move = function () {
     // Follow the mouse for now
     this.x = mouseX;
     this.y = mouseY;
 
-    // Add code to keep the player on the canvas
+    // Keep the rocket on the canvas
     if (this.x > width || this.x < 0)
       this.x = abs(this.x - width);
     if (this.y > height || this.y < 0)
       this.y = abs(this.y - height);
   }
 
+  // Accelerate rocket
   this.thrust = function () {
     let horiz = Math.sin(this.angle);
     let vert = Math.cos(this.angle);
@@ -199,6 +247,7 @@ function Player(tempX, tempY) {
     this.ySpeed -= 0.02 * vert;
   }
 
+  // Apply brakes to rocket
   this.brake = function () {
     if (this.xSpeed > 0)
       this.xSpeed -= 0.01;
@@ -208,6 +257,45 @@ function Player(tempX, tempY) {
       this.ySpeed -= 0.01;
     else
       this.ySpeed += 0.01;
+  }
+}
+
+// Star object constructor
+function Star(tempX, tempY) {
+  this.x = tempX;
+  this.y = tempY;
+  this.size = 40;
+  this.speed = 7; // Increase speed to make stars move down very fast
+
+  // Display star object
+  this.display = function () {
+    fill(255, 255, 0);
+    noStroke();
+    ellipse(this.x, this.y, this.size);
+  }
+
+  // Move star object
+  this.move = function () {
+    this.y += this.speed; // Increase y position by speed value
+  }
+}
+
+// Comet object constructor
+function Comet(tempX, tempY) {
+  this.x = tempX;
+  this.y = tempY;
+  this.size = 30;
+  this.speed = 10; // Adjust speed as needed
+
+  // Display comet object
+  this.display = function () {
+    fill(150); // Set comet color (gray)
+    ellipse(this.x, this.y, this.size);
+  }
+
+  // Move comet object
+  this.move = function () {
+    this.y += this.speed; // Increase y position by speed value
   }
 }
 
