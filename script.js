@@ -7,11 +7,12 @@
 
 let gameState = "splash";
 let player1;
+let gameTimer; 
 
 function setup() {
   createCanvas(600, 400);
-  // Create a new instance of the Player object
   player1 = new Player(width / 2, height * 4 / 5);
+  gameTimer = new Timer(5000); // 5 second timer
 }
 
 function draw() {
@@ -75,11 +76,21 @@ function play() {
     }
   }
   player1.move(); // helps move the player
+
+  //this will check if game timer has finished
+  if (gameTimer.isFinished()) {
+    gameState = "gameOver";
+  }
+
+  //displays elapsed time without decimals
+  textAlign(LEFT);
+  text("elapsed time: " + gameTimer.elapsedTime, 40, 100);
+  // show elapsed time in top left corner
 }
 
 function gameOver() {
   background(600, 0, 0);
-  fill(0); //text
+  fill(0);
   textAlign(CENTER, CENTER);
   textSize(32);
   text("Game Over", width/2, height/2);
@@ -88,8 +99,9 @@ function gameOver() {
 function mousePressed() {
   if (gameState === "splash") {
     gameState = "play";
+    gameTimer.start(); // starts the timer when the game begins
   } else if (gameState === "play") {
-    gameState = "gameOver";
+    // gameState = "gameOver"; //commented out to disable transition to game over state via mouse click
   } else if (gameState === "gameOver") {
     gameState = "splash";
   }
@@ -104,12 +116,33 @@ function Player(tempX, tempY) {
   this.xSpeed = 0;
   this.ySpeed = 0;
 
+  this.display = function () {
+    push();
+    translate(this.x, this.y);
+    rotate(this.angle);
+
+    fill(0);
+    let r = this.diam / 2;
+    let x1 = cos(PI + HALF_PI) * r;
+    let y1 = sin(PI + HALF_PI) * r;
+    let x2 = cos(PI / 6) * r;
+    let y2 = sin(PI / 6) * r;
+    let x3 = cos(PI * 5 / 6) * r;
+    let y3 = sin(PI * 5 / 6) * r;
+    beginShape();
+    vertex(x1, y1);
+    vertex(x2, y2);
+    vertex(x3, y3);
+    endShape();
+    pop();
+  }
+
   this.move = function () {
     // Follow the mouse for now
     this.x = mouseX;
     this.y = mouseY;
 
-    //adds code to keep the player on the canvas
+    // Add code to keep the player on the canvas
     if (this.x > width || this.x < 0)
       this.x = abs(this.x - width);
     if (this.y > height || this.y < 0)
@@ -134,4 +167,29 @@ function Player(tempX, tempY) {
       this.ySpeed += 0.01;
   }
 }
-//I prefer to change it to a different shape but because the other file has made it a triangle I will stick to it
+
+// Timer class definition
+class Timer {
+  constructor(duration) {
+    this.duration = duration;
+    this.startTime = 0;
+    this.isRunning = false;
+    this.elapsedTime = 0;
+  }
+
+  start() {
+    this.startTime = millis();
+    this.isRunning = true;
+  }
+
+  isFinished() {
+    if (this.isRunning) {
+      this.elapsedTime = millis() - this.startTime;
+      if (this.elapsedTime >= this.duration) {
+        this.isRunning = false;
+        return true;
+      }
+    }
+    return false;
+  }
+}
