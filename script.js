@@ -1,6 +1,6 @@
 /**
  * Project 3 versions 0-4 - 2D Web Game
- * Name:
+ * Name: Sara Ali
  * 
  * Use this template to get started creating a simple 2D game for the web using P5.js. 
  */
@@ -110,7 +110,7 @@ function Player(tempX, tempY) {
     this.x = mouseX;
     this.y = mouseY;
 
-    // Add code to keep the player on the canvas
+    //adds code to keep the player on the canvas
     if (this.x > width || this.x < 0)
       this.x = abs(this.x - width);
     if (this.y > height || this.y < 0)
