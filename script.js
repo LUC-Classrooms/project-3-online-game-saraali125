@@ -5,7 +5,6 @@
  * Use this template to get started creating a simple 2D game for the web using P5.js. 
  */
 
-
 let gameState = "splash";
 let player1;
 
@@ -80,7 +79,7 @@ function play() {
 
 function gameOver() {
   background(600, 0, 0);
-  fill(0);
+  fill(0); //text
   textAlign(CENTER, CENTER);
   textSize(32);
   text("Game Over", width/2, height/2);
