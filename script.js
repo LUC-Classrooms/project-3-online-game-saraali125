@@ -1,20 +1,19 @@
 /**
- * Fun 2D Web Game - Save the Stars!
+ 
  * Created by: Sara Ali
- * 
  */
 
 // Define game states
 let gameState = "splash";
 let player1;
-let gameTimer; 
+let gameTimer;
 let dropTimer; // regulate star drops
 let stars = []; // an array to hold star objects
 let score = 0; // keep track of points (starting at 0)
 let misses = 0; // keep track of misses
 
 function setup() {
-  createCanvas(600, 400);
+  createCanvas(800, 600);
   // Initialize player object (rocket)
   player1 = new Rocket(width / 2, height * 4 / 5);
   // Set up game timer for 30 seconds
@@ -25,7 +24,7 @@ function setup() {
 }
 
 function draw() {
-  background(200);
+  background(0);
   // Manage game state transitions
   switch (gameState) {
     case "splash":
@@ -44,14 +43,13 @@ function draw() {
 
 function splash() {
   // Display splash screen elements
-  background(40, 30, 30);
+  background(0);
   textAlign(CENTER);
   textSize(32);
   fill(255);
-  text("SAVE THE STARS!", width / 2, height / 3);
+  text("Star Dodge", width / 2, height / 3);
   textSize(16);
-  text("THREE STRIKES AND YOURE OUT", width / 2, height / 2);
-  fill(255, 255, 0);
+  text("Avoid the Stars and Survive", width / 2, height / 2);
   ellipse(50,50,20,20);
   ellipse(500,40,30,30);
   ellipse(550,140,20,20);
@@ -72,79 +70,56 @@ function splash() {
 
 function play() {
   // Display game elements during gameplay
-  background(0, 0, 0);
-  // Show player sprite on screen (rocket)
-  player1.display();
   // Move player with mouse
-  player1.x = mouseX;
-  player1.y = mouseY;
-
-  // Check arrow key inputs for player movement
-  if (keyIsPressed) {
-    switch (keyCode) {
-      case UP_ARROW:
-        player1.thrust(); // accelerate
-        break;
-      case DOWN_ARROW:
-        player1.brake();
-        break;
-      case LEFT_ARROW:
-        player1.angle -= 0.02; // turn left
-        break;
-      case RIGHT_ARROW:
-        player1.angle += 0.02; // turn right
-        break;
-      default:
-        // No default action
-    }
-  }
-  player1.move(); // move the player
+  player1.x = constrain(mouseX, 0, width);
+  player1.y = constrain(mouseY, 0, height);
 
   // Check if game timer has finished
   if (gameTimer.isFinished()) {
     gameState = "gameOver";
   }
 
-  // Display elapsed time and score
-  textAlign(LEFT);
-  fill(255);
-  text("TIME LEFT: " + (gameTimer.duration - gameTimer.elapsedTime) / 1000 + " seconds", 20, 20); // show time left
-  text("SCORE: " + score, 20, 40); // show score
-
   // Check the drop timer to spawn stars
-  if(dropTimer.isFinished()) {
+  if (dropTimer.isFinished()) {
     let s = new Star(random(width), -40); // create a star object
     stars.push(s); // add star to array
     dropTimer.start(); // restart timer for next drop
   }
 
   // Manage the stars array
-  for(let i = stars.length - 1; i >= 0; i--) { 
+  for (let i = stars.length - 1; i >= 0; i--) {
     stars[i].display();
     stars[i].move();
 
     // Remove stars that go past the bottom
-    if(stars[i].y > height) {
+    if (stars[i].y > height) {
       stars.splice(i, 1); // remove from array
-      score--; // decrement score by 1
+      score++; // increment score by 1
+    }
+
+    // Collision detection with player (rocket)
+    let d = dist(stars[i].x, stars[i].y, player1.x, player1.y);
+    if (d < 30) {
+      stars.splice(i, 1); // remove from array
       misses++; // increment misses
       if (misses >= 3) {
         gameState = "gameOver"; // end game if misses reach 3
       }
     }
-
-    // Collision detection with player (rocket)
-    let d = dist(stars[i].x, stars[i].y, player1.x, player1.y);
-    if (d < 50) {
-      stars.splice(i, 1); // remove from array
-      score += 10; // add 10 points to the score
-    }
   }
+
+  player1.display();
+
+  textAlign(LEFT);
+  fill(255);
+  text("TIME LEFT: " + (gameTimer.duration - gameTimer.elapsedTime) / 1000 + " seconds", 20, 20); // show time left
+  text("SCORE: " + score, 20, 40); // show score
+  text("MISSES: " + misses, 20, 60); // show misses
 }
 
 function gameOver() {
   // Display game over screen
-  background(200, 0, 0);
+  background(0);
   textAlign(CENTER);
   textSize(32);
   fill(255);
@@ -196,58 +171,23 @@ function Rocket(tempX, tempY) {
     endShape(CLOSE);
     pop();
   }
-
-  // Move rocket object
-  this.move = function () {
-    // Follow the mouse for now
-    this.x = mouseX;
-    this.y = mouseY;
-
-    // Keep the rocket on the canvas
-    if (this.x > width || this.x < 0)
-      this.x = abs(this.x - width);
-    if (this.y > height || this.y < 0)
-      this.y = abs(this.y - height);
-  }
-
-  // Accelerate rocket
-  this.thrust = function () {
-    let horiz = Math.sin(this.angle);
-    let vert = Math.cos(this.angle);
-    this.xSpeed += 0.02 * horiz;
-    this.ySpeed -= 0.02 * vert;
-  }
-
-  // Apply brakes to rocket
-  this.brake = function () {
-    if (this.xSpeed > 0)
-      this.xSpeed -= 0.01;
-    else
-      this.xSpeed += 0.01;
-    if (this.ySpeed > 0)
-      this.ySpeed -= 0.01;
-    else
-      this.ySpeed += 0.01;
-  }
 }
 
 // Star object constructor
 function Star(tempX, tempY) {
   this.x = tempX;
   this.y = tempY;
-  this.size = 40;
-  this.speed = 11; // Increase speed to make stars move down very fast
-//Sometimes when I increase the speed it makes the game freeze but its a great way to test your reflexes
+
   // Display star object
   this.display = function () {
     fill(255, 255, 0);
     noStroke();
-    ellipse(this.x, this.y, this.size);
+    ellipse(this.x, this.y, 30, 30); // Increase size
   }
 
   // Move star object
   this.move = function () {
-    this.y += this.speed; // Increase y position by speed value
+    this.y += 13; // Increase y position by speed value
   }
 }
 
@@ -276,3 +216,4 @@ class Timer {
     return false;
   }
 }
+
