@@ -1,9 +1,8 @@
 /**
- 
+ Comp 125 Project 3
  * Created by: Sara Ali
  */
 
-// Define game states
 let gameState = "splash";
 let player1;
 let gameTimer;
@@ -14,18 +13,16 @@ let misses = 0; // keep track of misses
 
 function setup() {
   createCanvas(800, 600);
-  // Initialize player object (rocket)
   player1 = new Rocket(width / 2, height * 4 / 5);
-  // Set up game timer for 30 seconds
+  // set up game timer for 30 seconds
   gameTimer = new Timer(30000); // 30 second timer
 
-  // Set up drop timer for stars (every 1 second)
+  // set up drop timer for stars (every 1 second)
   dropTimer = new Timer(1000);
 }
 
 function draw() {
   background(0);
-  // Manage game state transitions
   switch (gameState) {
     case "splash":
       splash();
@@ -69,17 +66,18 @@ function splash() {
 }
 
 function play() {
-  // Display game elements during gameplay
-  // Move player with mouse
+  //moves rocket with mouse
   player1.x = constrain(mouseX, 0, width);
   player1.y = constrain(mouseY, 0, height);
 
-  // Check if game timer has finished
+  //checks if game timer has finished
   if (gameTimer.isFinished()) {
     gameState = "gameOver";
+    //resets the game timer
+    gameTimer.start();
   }
 
-  // Check the drop timer to spawn stars
+  //checks the drop timer to spawn stars
   if (dropTimer.isFinished()) {
     // Drop multiple stars
     for (let i = 0; i < 5; i++) {
@@ -89,24 +87,25 @@ function play() {
     dropTimer.start(); // restart timer for next drop
   }
 
-  // Manage the stars array
   for (let i = stars.length - 1; i >= 0; i--) {
     stars[i].display();
     stars[i].move();
 
-    // Remove stars that go past the bottom
+    // remove stars that go past the bottom
     if (stars[i].y > height) {
       stars.splice(i, 1); // remove from array
       score++; // increment score by 1
     }
 
-    // Collision detection with player (rocket)
+    // collision detection with player (rocket)
     let d = dist(stars[i].x, stars[i].y, player1.x, player1.y);
     if (d < 30) {
       stars.splice(i, 1); // remove from array
       misses++; // increment misses
       if (misses >= 3) {
         gameState = "gameOver"; // end game if misses reach 3
+        // reset the game timer
+        gameTimer.start();
       }
     }
   }
@@ -120,9 +119,20 @@ function play() {
   text("MISSES: " + misses, 20, 60); // show misses
 }
 
+function gameOver() {
+  // display game over screen
+  background(200, 20, 0);
+  textAlign(CENTER);
+  textSize(32);
+  fill(255);
+  text("GAME OVER!", width / 2, height / 2);
+  textSize(24);
+  text("FINAL SCORE: " + score, width / 2, height * 2 / 3); // show final score
+}
+
 
 function mousePressed() {
-  // Start game on mouse click
+  // start game on mouse click
   if (gameState === "splash") {
     gameState = "play";
     gameTimer.start(); // start the game timer
@@ -130,15 +140,13 @@ function mousePressed() {
     score = 0; // reset score to 0 at start of game
     misses = 0; // reset misses to 0 at start of game
   } else if (gameState === "play") {
-    // No action during gameplay
   } else if (gameState === "gameOver") {
-    // Restart game on mouse click after game over
+    //restart game on mouse click after game over
     gameState = "splash";
   }
 }
 
 function Rocket(tempX, tempY) {
-  // Rocket object properties
   this.x = tempX;
   this.y = tempY;
   this.size = 50;
@@ -150,15 +158,15 @@ function Rocket(tempX, tempY) {
     push();
     translate(this.x, this.y);
     rotate(this.angle);
-    fill(90, 700, 55); // Change fill color to white
+    fill(90, 700, 55); //changes fill color to white
     stroke(90, 700, 55);
     strokeWeight(2);
-    ellipse(0, -50, 30, 105); // Oval
-    // Triangle
+    ellipse(0, -50, 30, 105); //oval
+    // triangle
     beginShape();
-    vertex(0, -12.5); // Top point
-    vertex(15, 12.5); // Bottom right point
-    vertex(-15, 12.5); // Bottom left point
+    vertex(0, -12.5); // top point
+    vertex(15, 12.5); // bottom right point
+    vertex(-15, 12.5); // bottom left point
     endShape(CLOSE);
     pop();
   }
@@ -168,17 +176,18 @@ function Star(tempX, tempY) {
   this.x = tempX;
   this.y = tempY;
 
-  // Display star object
+  // Displays the stars
   this.display = function () {
     fill(255, 255, 0);
     noStroke();
-    ellipse(this.x, this.y, 40, 40); // Increase size
+    ellipse(this.x, this.y, 60, 60); // Increase size
   }
 
-  // Move star object
   this.move = function () {
-    this.y += 13; // Increase y position by speed value
-  }
+    let speed = random(5, 14); // Generate a random speed between 5 and 10
+    this.y += speed; // Increase y position by the random speed value
+}
+
 }
 
 class Timer {
