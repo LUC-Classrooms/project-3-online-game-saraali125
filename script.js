@@ -144,7 +144,6 @@ function mousePressed() {
   }
 }
 
-// Rocket object constructor
 function Rocket(tempX, tempY) {
   // Rocket object properties
   this.x = tempX;
@@ -154,7 +153,6 @@ function Rocket(tempX, tempY) {
   this.xSpeed = 0;
   this.ySpeed = 0;
 
-  // Display rocket object
   this.display = function () {
     push();
     translate(this.x, this.y);
@@ -173,7 +171,6 @@ function Rocket(tempX, tempY) {
   }
 }
 
-// Star object constructor
 function Star(tempX, tempY) {
   this.x = tempX;
   this.y = tempY;
@@ -191,7 +188,6 @@ function Star(tempX, tempY) {
   }
 }
 
-// Timer class definition
 class Timer {
   constructor(duration) {
     this.duration = duration;
