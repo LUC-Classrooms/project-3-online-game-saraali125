@@ -81,8 +81,11 @@ function play() {
 
   // Check the drop timer to spawn stars
   if (dropTimer.isFinished()) {
-    let s = new Star(random(width), -40); // create a star object
-    stars.push(s); // add star to array
+    // Drop multiple stars
+    for (let i = 0; i < 5; i++) {
+      let s = new Star(random(width), -40); // create a star object
+      stars.push(s); // add star to array
+    }
     dropTimer.start(); // restart timer for next drop
   }
 
@@ -117,16 +120,6 @@ function play() {
   text("MISSES: " + misses, 20, 60); // show misses
 }
 
-function gameOver() {
-  // Display game over screen
-  background(0);
-  textAlign(CENTER);
-  textSize(32);
-  fill(255);
-  text("GAME OVER!", width / 2, height / 2);
-  textSize(24);
-  text("FINAL SCORE: " + score, width / 2, height * 2 / 3); // show final score
-}
 
 function mousePressed() {
   // Start game on mouse click
