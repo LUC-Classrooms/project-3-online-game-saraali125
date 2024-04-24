@@ -179,7 +179,7 @@ function Star(tempX, tempY) {
   this.display = function () {
     fill(255, 255, 0);
     noStroke();
-    ellipse(this.x, this.y, 30, 30); // Increase size
+    ellipse(this.x, this.y, 40, 40); // Increase size
   }
 
   // Move star object
