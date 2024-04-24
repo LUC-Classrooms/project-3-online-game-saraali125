@@ -236,7 +236,7 @@ function Star(tempX, tempY) {
   this.x = tempX;
   this.y = tempY;
   this.size = 40;
-  this.speed = 7; // Increase speed to make stars move down very fast
+  this.speed = 11; // Increase speed to make stars move down very fast
 //Sometimes when I increase the speed it makes the game freeze but its a great way to test your reflexes
   // Display star object
   this.display = function () {
