@@ -184,7 +184,7 @@ function Star(tempX, tempY) {
   }
 
   this.move = function () {
-    let speed = random(5, 20); // Generate a random speed between 5 and 10
+    let speed = random(5, 15); // Generate a random speed between 5 and 10
     this.y += speed; // Increase y position by the random speed value
 }
 
